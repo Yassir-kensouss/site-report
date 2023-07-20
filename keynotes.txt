@@ -1,0 +1,30 @@
+## SEO & Optimization
+** Check if images contains alt attribute
+** Check if the provided page contains heading and subheadings (h1, h2...)
+** Check the extension of images and suggest a optimized extensions
+** Missing meta description
+** Too many JavaScript and CSS files
+** Long title element
+** 1 page has more than one H1 tag
+
+
+## Accessibility
+** see if the provided page respects accessibility guidelines
+---> button without text must contain an aria-label attribute
+
+
+API Structure:
+
+Optimization:
+  - domain-name/api/optimization/media
+  - domain-name/api/optimization/fonts
+  - domain-name/api/optimization/links
+
+Search Engine Optimization:
+  - domain-name/api/seo/media
+  - domain-name/api/seo/html-structure
+  - domain-name/api/seo/meta-tags
+
+Accessibility:
+  - domain-name/api/accessibility/html-structure
+  - domain-name/api/accessibility/identifiers
