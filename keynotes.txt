@@ -18,7 +18,7 @@ API Structure:
 Optimization:
   - domain-name/api/optimization/media
   - domain-name/api/optimization/fonts
-  - domain-name/api/optimization/links
+  - domain-name/api/optimization/files
 
 Search Engine Optimization:
   - domain-name/api/seo/media
