@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@axe-core/puppeteer": "^4.7.3",
     "axios": "^1.4.0",
     "b64-lite": "^1.4.0",
     "body-parser": "^1.20.2",
