@@ -30,7 +30,7 @@ router.get("/", async (req, res) => {
       },
       criticalIssues: criticalIssues,
       incompleteIssues: incompleteIssues,
-      // t: results.violations,
+      // t: results.passes,
     });
   } catch (e) {
     // do something with the error

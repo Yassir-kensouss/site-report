@@ -1,5 +1,4 @@
 const express = require("express");
-const bodyParser = require("body-parser");
 
 // Routes
 const accessibilityRoutes = require("./routers/accessibility");

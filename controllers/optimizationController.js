@@ -3,13 +3,23 @@ const ImagesDetails = require("../utilities/ImagesAnalytics");
 const PageLoader = require("../utilities/PageLoader");
 const puppeteer = require("puppeteer");
 const { unusedCss } = require("../utilities/styleSheetsPer");
-const fetch = require("node-fetch");
-const { HTTP_LINKS_REGEX } = require("../config/contants");
-const { fromBase64 } = require("b64-lite");
 const getFilesSizes = require("../utilities/filesTotalSize");
-const axios = require("axios");
 const sizeOf = require("image-size");
 const { scrollPageToBottom } = require("puppeteer-autoscroll-down");
+
+const fs = require("fs");
+const lighthouse = require("lighthouse");
+const chromeLauncher = require("chrome-launcher");
+const reportGenerator = require("lighthouse/lighthouse-core/report/report-generator");
+const request = require("request");
+const util = require("util");
+const { PerformanceObserver } = require("perf_hooks");
+
+const options = {
+  logLevel: "info",
+  disableDeviceEmulation: true,
+  chromeFlags: ["--disable-mobile-emulation"],
+};
 
 exports.mediaAnalyzer = async (req, res) => {
   let pageLink = req.body.pageLink;
@@ -136,4 +146,90 @@ exports.getImgResolution = async (req, res) => {
       error: INVALID_PAGE_LINK,
     });
   }
+};
+
+exports.getFCP = async (req, res) => {
+  try {
+    const pageLink = req.body.pageLink;
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.goto(pageLink, { waitUntil: "networkidle2" });
+
+    // Get performance entries
+    const rawPerfEntries = await page.evaluate(function () {
+      return JSON.stringify(window.performance.getEntries());
+    });
+
+    // Parsing string
+    const allPerformanceEntries = JSON.parse(rawPerfEntries);
+
+    // Find FirstContentfulPaing
+    const fcp = allPerformanceEntries.filter(
+      x => x.name === "first-contentful-paint"
+    );
+
+    return res.json({
+      first_contentful_pain: fcp,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: error.message,
+    });
+  }
+};
+
+exports.getTTFB = async (req, res) => {
+  try {
+    const pageLink = req.body.pageLink;
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.goto(pageLink, { waitUntil: "networkidle2" });
+
+    // Get performance entries
+    const rawPerfEntries = await page.evaluate(function () {
+      return JSON.stringify(window.performance.getEntries());
+    });
+
+    // Parsing string
+    const allPerformanceEntries = JSON.parse(rawPerfEntries);
+
+    // get first time to interactive
+    const navigationEvents = allPerformanceEntries.find(
+      el => el.entryType === "navigation"
+    );
+
+    res.json({
+      time_to_first_byte: navigationEvents.responseStart,
+    });
+  } catch {
+    return res.status(500).json({
+      error: error.message,
+    });
+  }
+};
+
+exports.getMetrics = async (req, res) => {
+  const pageLink = req.body.pageLink;
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+
+  await page.goto(pageLink, { waitUntil: "networkidle2" });
+
+  const metrics = await page.evaluate(() => JSON.stringify(window.performance));
+  const performanceTiming = JSON.parse(metrics);
+
+  const totalReqResTime =
+    performanceTiming.timing.responseEnd -
+    performanceTiming.timing.requestStart;
+
+  const ttfb =
+    performanceTiming.timing.responseStart -
+    performanceTiming.timing.requestStart;
+
+  await browser.close();
+
+  res.json({
+    totalReqResTime,
+    ttfb,
+  });
 };
