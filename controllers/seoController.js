@@ -1,8 +1,10 @@
 const { INVALID_PAGE_LINK } = require("../config/errors");
 const ImagesDetails = require("../utilities/ImagesAnalytics");
-const MetaTagsScanner = require("../utilities/MetaTagsScaner");
+const MetaDescriptionScanner = require("../utilities/MetaDescription");
+const PageTitleScanner = require("../utilities/MetaTagsScaner");
 const PageLoader = require("../utilities/PageLoader");
 const puppeteer = require("puppeteer");
+const SemanticScanning = require("../utilities/semanticScaning");
 
 exports.mediaAnalyzer = async (req, res) => {
   let pageLink = req.body.pageLink;
@@ -35,9 +37,14 @@ exports.scanPageMetaTags = async (req, res) => {
     const page = await pageLoader.loadPage();
 
     // get page title tag and content
-    const metaTagsScanner = new MetaTagsScanner(pageLink, page);
+    const pageTitleScanner = new PageTitleScanner(pageLink, page);
     const { title, existence, titleLength, keywordsCount } =
-      await metaTagsScanner.getPageTitle();
+      await pageTitleScanner.getPageTitle();
+
+    // get page meta description
+    const pageDescriptionMetadata = new MetaDescriptionScanner(pageLink, page);
+    const { content, descriptionExist } =
+      await pageDescriptionMetadata.scanMetaTag();
 
     res.json({
       title: {
@@ -45,6 +52,10 @@ exports.scanPageMetaTags = async (req, res) => {
         existence,
         titleLength,
         keywordsCount,
+      },
+      description: {
+        description: content,
+        existence: descriptionExist,
       },
     });
   } catch (error) {
@@ -93,4 +104,32 @@ exports.generateKeywords = async (req, res) => {
   });
 
   await browser.close();
+};
+
+exports.semantic = async (req, res) => {
+  try {
+    // Load Page Init
+    let pageLink = req.body.pageLink;
+    const pageLoader = new PageLoader(pageLink);
+    const page = await pageLoader.loadPage();
+
+    const semantic = new SemanticScanning(pageLink, page);
+    const { content, existence, onePerPage, charLength } =
+      await semantic.firstLevelHeading();
+
+    res.json({
+      headings: {
+        firstLevel: {
+          content,
+          existence,
+          onePerPage,
+          charLength,
+        },
+      },
+    });
+  } catch (error) {
+    res.status(400).json({
+      error: INVALID_PAGE_LINK,
+    });
+  }
 };

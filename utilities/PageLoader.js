@@ -15,7 +15,7 @@ class PageLoader {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
 
-    await page.goto(this.pageLink);
+    await page.goto(this.pageLink, { waitUntil: "networkidle2" });
 
     await page.evaluate(_ => {
       window.scrollTo(0, 0);

@@ -9,7 +9,7 @@ const {
 } = require("../config/mesages");
 const getKeywordsCount = require("./getKeywords");
 
-class MetaTagsScanner {
+class PageTitleScanner {
   constructor(pageLink = "", page) {
     this.pageLink = pageLink;
     this.page = page;
@@ -49,4 +49,4 @@ class MetaTagsScanner {
   }
 }
 
-module.exports = MetaTagsScanner;
+module.exports = PageTitleScanner;
