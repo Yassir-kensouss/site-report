@@ -114,22 +114,21 @@ exports.semantic = async (req, res) => {
     const page = await pageLoader.loadPage();
 
     const semantic = new SemanticScanning(pageLink, page);
-    const { content, existence, onePerPage, charLength } =
+    const { existence, onePerPage, message } =
       await semantic.firstLevelHeading();
 
     res.json({
       headings: {
         firstLevel: {
-          content,
           existence,
+          message,
           onePerPage,
-          charLength,
         },
       },
     });
   } catch (error) {
     res.status(400).json({
-      error: INVALID_PAGE_LINK,
+      error: error.message,
     });
   }
 };
